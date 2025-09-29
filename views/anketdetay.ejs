@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>
+    <% if (typeof yeniAnket !== 'undefined' && yeniAnket) { %>
+      Yeni Anket Oluştur
+    <% } else { %>
+      Anket Detay - <%= anket.baslik %>
+    <% } %>
+  </title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" href="/favicon.ico">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+    }
+
+    .sidebar {
+      height: 100vh;
+      background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
+      color: #fff;
+      padding: 1rem;
+      min-width: 220px;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.2);
+    }
+
+    .sidebar h3 {
+      margin-bottom: 2rem;
+      text-align: center;
+      color: #fbbf24;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+    }
+
+    .sidebar a {
+      color: #fff;
+      display: block;
+      margin: 1rem 0;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      transition: 0.3s;
+    }
+
+    .sidebar a:hover, .sidebar a.active {
+      background: #fbbf24;
+      color: #111827;
+      font-weight: 600;
+      transform: translateX(5px);
+    }
+
+    .main {
+      padding: 2rem;
+      flex-grow: 1;
+    }
+
+    .soru-card {
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      background: white;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+
+    .soru-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1rem;
+    }
+
+    .secenek-item {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 0.8rem;
+      margin-bottom: 0.5rem;
+      border-left: 4px solid #17a2b8;
+    }
+
+    .btn-sm-custom {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.875rem;
+      border-radius: 0.375rem;
+    }
+
+    .sorular-header {
+      padding: 1.25rem 1rem;
+    }
+
+    .sorular-container {
+      min-height: 200px;
+      padding: 1.5rem 1rem;
+    }
+
+    .soru-form-container {
+      padding: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="d-flex">
+  
+    <div class="sidebar">
+      <h3>Admin Panel</h3>
+      <a href="/admin">
+        <i class="fas fa-tachometer-alt"></i> Dashboard
+      </a>
+      <a href="/admin/anketler" class="active">
+        <i class="fas fa-poll"></i> Anketler
+      </a>
+      <a href="/admin/kullaniciCevap">
+        <i class="fas fa-users"></i> Kullanıcılar
+      </a>
+      <a href="/admin/anketIstatistik">
+        <i class="fas fa-chart-bar"></i> İstatistik
+      </a>
+      <hr style="margin: 2rem 0; border-color: #374151;">
+      <a href="/admin/cikis" style="color: #ef4444;">
+        <i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i>Çıkış Yap
+      </a>
+    </div>
+
+    <div class="main">
+      <% if (typeof yeniAnket !== 'undefined' && yeniAnket) { %>
+        <!-- Yeni Anket Oluşturma Kısmı -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <h2><i class="fas fa-plus me-2"></i>Yeni Anket Oluştur</h2>
+            <p class="text-muted mb-0">Anket başlığı, soruları ve seçenekleri ekleyip kaydedin.</p>
+          </div>
+          <div>
+            <button class="btn btn-success me-2" onclick="anketiKaydet()">
+              <i class="fas fa-save me-2"></i>Anketi Kaydet
+            </button>
+            <a href="/admin/anketler" class="btn btn-secondary">
+              <i class="fas fa-arrow-left me-2"></i>Geri
+            </a>
+          </div>
+        </div>
+        
+        <!-- Anket Başlığı Formu -->
+        <div class="card mb-4">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-heading me-2"></i>Anket Başlığı</h5>
+          </div>
+          <div class="card-body">
+            <input type="text" class="form-control form-control-lg mb-3" id="anketBaslik" 
+                   placeholder="Anket başlığını buraya yazın..." required>
+            
+            <!-- Anket Ayarları -->
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="anketAktif" checked>
+                  <label class="form-check-label" for="anketAktif">
+                    <i class="fas fa-toggle-on text-success me-1"></i>Anket Aktif
+                  </label>
+                  <small class="form-text text-muted d-block">Pasif anketler kullanıcılara görünmez</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Soru Ekleme Butonu -->
+        <div class="card mb-4">
+          <div class="card-header bg-success text-white sorular-header">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0"><i class="fas fa-question-circle me-2"></i>Sorular</h5>
+              <button class="btn btn-light btn-sm" onclick="yeniSoruEkle()">
+                <i class="fas fa-plus me-2"></i>Yeni Soru Ekle
+              </button>
+            </div>
+          </div>
+          <div class="card-body sorular-container" id="sorularContainer">
+            <!-- Dinamik olarak soru eklenecek buraya -->
+          </div>
+        </div>
+      <% } else { %>
+        <!-- Mevcut Anket Düzenleme Kısmı -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <h2>
+              <i class="fas fa-poll me-2"></i><%= anket.baslik %>
+              <button class="btn btn-outline-primary btn-sm ms-2" 
+                      onclick="anketBaslikDuzenle('<%= anket.id %>', '<%= anket.baslik %>')">
+                <i class="fas fa-edit"></i>
+              </button>
+              <!-- Durum Badge'leri -->
+              <% if (typeof anket.aktif !== 'undefined') { %>
+                <span class="badge <%= anket.aktif ? 'bg-success' : 'bg-secondary' %> ms-2">
+                  <i class="fas fa-<%= anket.aktif ? 'check-circle' : 'pause-circle' %> me-1"></i>
+                  <%= anket.aktif ? 'Aktif' : 'Pasif' %>
+                </span>
+              <% } %>
+            </h2>
+            <div class="row">
+              <div class="col-md-6">
+                <p class="text-muted mb-0">Anket ID: #<%= anket.id %></p>
+              </div>
+              <div class="col-md-6">
+                <% if (anket.olusturma_tarihi) { %>
+                  <p class="text-muted mb-0">
+                    <i class="fas fa-calendar me-1"></i>
+                    Oluşturulma: <%= new Date(anket.olusturma_tarihi).toLocaleDateString('tr-TR') %> 
+                    <%= new Date(anket.olusturma_tarihi).toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'}) %>
+                  </p>
+                <% } %>
+              </div>
+            </div>
+          </div>
+          <div>
+            <button class="btn btn-info me-2" onclick="anketAyarlariGoster('<%= anket.id %>')">
+              <i class="fas fa-cog me-2"></i>Ayarlar
+            </button>
+            <button class="btn btn-success me-2" onclick="anketKaydet('<%= anket.id %>')">
+              <i class="fas fa-save me-2"></i>Kaydet
+            </button>
+            <button class="btn btn-danger me-2" onclick="anketSilOnay('<%= anket.id %>', '<%= anket.baslik %>')">
+              <i class="fas fa-trash me-2"></i>Anketi Sil
+            </button>
+            <a href="/admin/anketler" class="btn btn-secondary">
+              <i class="fas fa-arrow-left me-2"></i>Geri
+            </a>
+          </div>
+        </div>
+
+        <!-- Sorular kısmı mevcut anket için -->
+        <div class="card mb-4">
+          <div class="card-header bg-success text-white sorular-header">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0"><i class="fas fa-question-circle me-2"></i>Sorular</h5>
+              <button class="btn btn-light btn-sm" onclick="mevcutAnketSoruEkle('<%= anket.id %>')">
+                <i class="fas fa-plus me-2"></i>Yeni Soru Ekle
+              </button>
+            </div>
+          </div>
+          <div class="card-body sorular-container" id="sorularContainer">
+            <% if (sorular.length > 0) { %>
+              <% sorular.forEach((soru, index) => { %>
+                <div class="soru-card mb-3" data-soru-id="<%= soru.id %>">
+                  <div class="soru-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <h5 class="mb-1">
+                          Soru <%= index + 1 %>
+                          <% if (typeof soru.zorunlu !== 'undefined' && soru.zorunlu) { %>
+                            <span class="badge bg-warning text-dark ms-2">
+                              <i class="fas fa-asterisk"></i> Zorunlu
+                            </span>
+                          <% } %>
+                        </h5>
+                        <p class="mb-0"><%= soru.soru_metni %></p>
+                      </div>
+                      <div>
+                        <button class="btn btn-sm <%= soru.zorunlu ? 'btn-warning' : 'btn-outline-light' %> me-2" 
+                                onclick="soruZorunluToggle('<%= soru.id %>')" 
+                                data-zorunlu="<%= soru.zorunlu ? 'true' : 'false' %>" title="<%= soru.zorunlu ? 'Zorunlu (Kaldır)' : 'Zorunlu Yap' %>">
+                          <i class="fas fa-asterisk"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-light me-2" 
+                                onclick="mevcutAnketSecenekEkle('<%= soru.id %>')" title="Seçenek Ekle">
+                          <i class="fas fa-plus me-1"></i>Seçenek
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-light" 
+                                onclick="mevcutSoruSil('<%= soru.id %>')" title="Soru Sil">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <% if (secenekler[soru.id] && secenekler[soru.id].length > 0) { %>
+                      <h6 class="mb-3"><i class="fas fa-list me-2"></i>Seçenekler:</h6>
+                      <% secenekler[soru.id].forEach(secenek => { %>
+                        <div class="secenek-item d-flex justify-content-between align-items-center mb-2">
+                          <span><i class="fas fa-check-circle text-info me-2"></i><%= secenek.secenek_metni %></span>
+                          <button type="button" class="btn btn-sm btn-outline-danger btn-sm-custom" 
+                                  onclick="secenekSilOnay('<%= secenek.id %>')">
+                            <i class="fas fa-times"></i>
+                          </button>
+                        </div>
+                      <% }) %>
+                    <% } else { %>
+                      <div class="text-center py-3 text-muted">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Bu soru için henüz seçenek eklenmemiş.
+                        <br><small>Seçenek eklemek için yukarıdaki "Seçenek" butonuna tıklayın.</small>
+                      </div>
+                    <% } %>
+                  </div>
+                </div>
+              <% }) %>
+            <% } else { %>
+              <div class="text-center py-5">
+                <i class="fas fa-question-circle fa-5x text-muted mb-3"></i>
+                <h4 class="text-muted">Henüz soru bulunmamaktadır.</h4>
+                <p class="text-muted">İlk soruyu eklemek için yukarıdaki butona tıklayın.</p>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+      <!-- Mesajlar kısmı -->
+      <% if (typeof req !== 'undefined' && req.query.basari) { %>
+        <div class="alert alert-success alert-dismissible fade show">
+          <i class="fas fa-check-circle me-2"></i>
+          <% if (req.query.basari === 'soru-eklendi') { %>
+            Soru başarıyla eklendi!
+          <% } else if (req.query.basari === 'soru-silindi') { %>
+            Soru başarıyla silindi!
+          <% } else if (req.query.basari === 'secenek-eklendi') { %>
+            Seçenek başarıyla eklendi!
+          <% } else if (req.query.basari === 'secenek-silindi') { %>
+            Seçenek başarıyla silindi!
+          <% } %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      <% } %>
+
+      <% if (typeof req !== 'undefined' && req.query.hata) { %>
+        <div class="alert alert-danger alert-dismissible fade show">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          <% if (req.query.hata === 'soru-bos') { %>
+            Soru metni boş olamaz!
+          <% } else if (req.query.hata === 'secenek-bos') { %>
+            Seçenek metni boş olamaz!
+          <% } else { %>
+            Bir hata oluştu!
+          <% } %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Onay Modal'ı -->
+  <div class="modal fade" id="onayModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-warning text-dark">
+          <h5 class="modal-title">
+            <i class="fas fa-exclamation-triangle me-2"></i>Onay Gerekli
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="text-center">
+            <i class="fas fa-question-circle fa-3x text-warning mb-3"></i>
+            <p id="onayMesaji" class="fs-5 mb-3"></p>
+            <p class="text-muted small">Bu işlem geri alınamaz!</p>
+          </div>
+        </div>
+        <div class="modal-footer justify-content-center">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-times me-2"></i>İptal
+          </button>
+          <button type="button" class="btn btn-danger" id="onayButonu">
+            <i class="fas fa-trash me-2"></i>Evet, Sil
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    // Ortak fonksiyonlar hem anket oluşturma hemde anket detay için
+    
+    // Onay modal'ı gösterme fonksiyonu
+    function onayGoster(mesaj, onayCallback) {
+      document.getElementById('onayMesaji').textContent = mesaj;
+      const onayButonu = document.getElementById('onayButonu');
+      
+      // Kaydetme işlemi ise buton metnini değiştirir
+      if (mesaj.includes('kaydet')) {
+        onayButonu.innerHTML = '<i class="fas fa-save me-2"></i>Evet, Kaydet';
+        onayButonu.className = 'btn btn-success';
+      } else {
+        onayButonu.innerHTML = '<i class="fas fa-trash me-2"></i>Evet, Sil';
+        onayButonu.className = 'btn btn-danger';
+      }
+      
+      // Eski event listener'ları temizler
+      onayButonu.replaceWith(onayButonu.cloneNode(true));
+      const yeniOnayButonu = document.getElementById('onayButonu');
+      
+      // Yeni event listener ekler
+      yeniOnayButonu.addEventListener('click', function() {
+        const modal = bootstrap.Modal.getInstance(document.getElementById('onayModal'));
+        modal.hide();
+        onayCallback();
+      });
+      
+      // Modal'ı gösterir
+      const modal = new bootstrap.Modal(document.getElementById('onayModal'));
+      modal.show();
+    }
+    
+    // Anket başlığı düzenleme fonksiyonu
+    function anketBaslikDuzenle(id, baslik) {
+      const headerDiv = document.querySelector('.main .d-flex.justify-content-between.align-items-center.mb-4');
+      
+      // Eğer zaten bir form varsa, onu kaldırır
+      const mevcutForm = document.getElementById('baslikDuzenleFormu');
+      if (mevcutForm) {
+        mevcutForm.remove();
+        return;
+      }
+      
+      // Başlık düzenleme formu oluşturur
+      const formHtml = `
+        <div class="card mb-4" id="baslikDuzenleFormu" style="border: 2px dashed #007bff;">
+          <div class="card-header bg-light">
+            <h6 class="mb-0 text-primary">
+              <i class="fas fa-edit me-2"></i>Anket Başlığını Düzenle
+            </h6>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <label class="form-label">Anket Başlığı</label>
+              <input type="text" class="form-control" id="yeniBaslikInput" value="${baslik}" required>
+            </div>
+            <div class="d-flex gap-2">
+              <button type="button" class="btn btn-success" onclick="baslikUygula('${id}')">
+                <i class="fas fa-check me-1"></i>Uygula
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="baslikFormKapat()">
+                <i class="fas fa-times me-1"></i>İptal
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      headerDiv.insertAdjacentHTML('afterend', formHtml);
+      document.querySelector('#baslikDuzenleFormu input').focus();
+    }
+    
+    function baslikUygula(id) {
+      const yeniBaslik = document.getElementById('yeniBaslikInput').value.trim();
+      
+      if (!yeniBaslik) {
+        alert('Başlık boş olamaz!');
+        return;
+      }
+      
+      // Başlığı görsel olarak günceller
+      const baslikElement = document.querySelector('.main h2');
+      baslikElement.innerHTML = `
+        <i class="fas fa-poll me-2"></i>${yeniBaslik}
+        <button class="btn btn-outline-primary btn-sm ms-2" 
+                onclick="anketBaslikDuzenle('${id}', '${yeniBaslik}')">
+          <i class="fas fa-edit"></i>
+        </button>
+      `;
+      
+      // Global değişkende saklar
+      window.yeniAnketBasligi = yeniBaslik;
+      
+      baslikFormKapat();
+    }
+    
+    function baslikFormKapat() {
+      const form = document.getElementById('baslikDuzenleFormu');
+      if (form) {
+        form.remove();
+      }
+    }
+
+    // Anket silme onay fonksiyonu
+    function anketSilOnay(id, baslik) {
+      const mesaj = `"${baslik}" adlı anketi silmek istediğinizden emin misiniz?`;
+      onayGoster(mesaj, function() {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/anketSil/${id}`;
+        document.body.appendChild(form);
+        form.submit();
+      });
+    }
+
+    // Anket kaydet fonksiyonu
+    function anketKaydet(anketId) {
+      
+      const mesaj = "Değişiklikleri kaydetmek istediğinizden emin misiniz?";
+      onayGoster(mesaj, function() {
+        // Popup gösterir
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-success alert-dismissible fade show position-fixed';
+        alert.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 320px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
+        alert.innerHTML = `
+          <i class="fas fa-check-circle me-2"></i>
+          <strong>Anket kaydediliyor...</strong><br>
+          <small class="text-muted">Anketler sayfasına yönlendiriliyorsunuz.</small>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(alert);
+        
+        
+        setTimeout(() => {
+          // Eğer başlık değişmişse kaydet ve anketler sayfasına yönlendirir
+          if (window.yeniAnketBasligi) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/admin/anketDuzenle/${anketId}`;
+            
+            const baslikInput = document.createElement('input');
+            baslikInput.type = 'hidden';
+            baslikInput.name = 'baslik';
+            baslikInput.value = window.yeniAnketBasligi;
+            form.appendChild(baslikInput);
+            
+            // Redirect parametresi ekler
+            const redirectInput = document.createElement('input');
+            redirectInput.type = 'hidden';
+            redirectInput.name = 'redirect';
+            redirectInput.value = 'anketler';
+            form.appendChild(redirectInput);
+            
+            document.body.appendChild(form);
+            form.submit();
+            return;
+          }
+          
+          // Başlık değişmemişse direkt anketler sayfasına yönlendirir
+          window.location.href = '/admin/anketler';
+        }, 1500);
+      });
+    }
+
+    // Mevcut anket için soru ekleme fonksiyonu
+    function mevcutAnketSoruEkle(anketId) {
+      const container = document.getElementById('sorularContainer');
+      
+      // Eğer zaten bir form varsa, onu kaldırır
+      const mevcutForm = document.getElementById('mevcutSoruFormu');
+      if (mevcutForm) {
+        mevcutForm.remove();
+        return;
+      }
+      
+      // Yeni soru formu oluşturur
+      const formHtml = `
+        <div class="card mb-3" id="mevcutSoruFormu" style="border: 2px dashed #28a745;">
+          <div class="card-header bg-light">
+            <h6 class="mb-0 text-success">
+              <i class="fas fa-plus me-2"></i>Yeni Soru Ekle
+            </h6>
+          </div>
+          <div class="card-body">
+            <form action="/admin/anket/${anketId}/soru" method="POST">
+              <div class="mb-3">
+                <label class="form-label">Soru Metni</label>
+                <textarea class="form-control" name="soruMetni" rows="2" 
+                         placeholder="Soru metnini buraya yazın..." required></textarea>
+              </div>
+              <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-success">
+                  <i class="fas fa-check me-1"></i>Soru Ekle
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="mevcutSoruFormKapat()">
+                  <i class="fas fa-times me-1"></i>İptal
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+      
+      container.insertAdjacentHTML('afterbegin', formHtml);
+      container.querySelector('textarea[name="soruMetni"]').focus();
+    }
+    
+    function mevcutSoruFormKapat() {
+      const form = document.getElementById('mevcutSoruFormu');
+      if (form) {
+        form.remove();
+      }
+    }
+
+    // Mevcut anket için soru silme fonksiyonu
+    function mevcutSoruSil(soruId) {
+      const mesaj = "Bu soruyu silmek istediğinizden emin misiniz?";
+      onayGoster(mesaj, function() {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/soru/${soruId}/sil`;
+        document.body.appendChild(form);
+        form.submit();
+      });
+    }
+
+    // Mevcut anket için seçenek ekleme fonksiyonu
+    function mevcutAnketSecenekEkle(soruId) {
+      const soruCard = document.querySelector(`[data-soru-id="${soruId}"]`);
+      if (!soruCard) {
+        // Eğer data attribute yoksa, soru kartını farklı şekilde alır
+        const allCards = document.querySelectorAll('.soru-card');
+        for (let card of allCards) {
+          const button = card.querySelector(`button[onclick*="${soruId}"]`);
+          if (button) {
+            handleSecenekEkle(card, soruId);
+            return;
+          }
+        }
+        return;
+      }
+      
+      handleSecenekEkle(soruCard, soruId);
+    }
+    
+    function handleSecenekEkle(soruCard, soruId) {
+      // Eğer zaten bir form varsa, onu kaldırır
+      const mevcutForm = soruCard.querySelector('.mevcutsecenek-form');
+      if (mevcutForm) {
+        mevcutForm.remove();
+        return;
+      }
+      
+      // Seçenek formu oluşturur
+      const formHtml = `
+        <div class="mevcutsecenek-form mt-3 p-3" style="background: #f8f9fa; border-radius: 8px; border-left: 4px solid #17a2b8;">
+          <form action="/admin/soru/${soruId}/secenek" method="POST">
+            <div class="mb-2">
+              <label class="form-label small fw-bold text-info">Yeni Seçenek</label>
+              <input type="text" class="form-control form-control-sm" name="secenekMetni" 
+                     placeholder="Seçenek metnini yazın..." required>
+            </div>
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-info btn-sm">
+                <i class="fas fa-plus me-1"></i>Ekle
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="mevcutSecenekFormKapat('${soruId}')">
+                <i class="fas fa-times me-1"></i>İptal
+              </button>
+            </div>
+          </form>
+        </div>
+      `;
+      
+      const cardBody = soruCard.querySelector('.card-body');
+      cardBody.insertAdjacentHTML('beforeend', formHtml);
+      cardBody.querySelector('input[name="secenekMetni"]').focus();
+    }
+
+    // Seçenek ekleme wrapper fonksiyonu
+    function mevcutSecenekEkle(soruId) {
+      mevcutAnketSecenekEkle(soruId);
+    }
+    
+    // Seçenek silme fonksiyonu
+    function secenekSilOnay(secenekId) {
+      const mesaj = "Bu seçeneği silmek istediğinizden emin misiniz?";
+      onayGoster(mesaj, function() {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/secenek/${secenekId}/sil`;
+        document.body.appendChild(form);
+        form.submit();
+      });
+    }
+
+    // Anket ayarları modal'ını gösterir
+    function anketAyarlariGoster(anketId) {
+      // Ayarlar modal'ı oluşturur
+      const modalHtml = `
+        <div class="modal fade" id="ayarlarModal" tabindex="-1">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">
+                  <i class="fas fa-cog me-2"></i>Anket Ayarları
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body">
+                <div class="mb-3">
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="modalAnketAktif">
+                    <label class="form-check-label" for="modalAnketAktif">
+                      <i class="fas fa-toggle-on text-success me-1"></i>Anket Aktif
+                    </label>
+                    <small class="form-text text-muted d-block">Pasif anketler kullanıcılara görünmez</small>
+                  </div>
+                </div>
+                <div class="alert alert-info">
+                  <i class="fas fa-info-circle me-2"></i>
+                  <strong>Not:</strong> Soruların zorunlu olup olmadığını her soru için ayrı ayrı ayarlayabilirsiniz.
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-info" onclick="anketAyarlariKaydet('${anketId}')">
+                  <i class="fas fa-save me-2"></i>Kaydet
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // Eski modal'ı kaldırır
+      const eskiModal = document.getElementById('ayarlarModal');
+      if (eskiModal) eskiModal.remove();
+      
+      // Yeni modal'ı ekler
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+      
+      // Modal'ı gösterir
+      const modal = new bootstrap.Modal(document.getElementById('ayarlarModal'));
+      modal.show();
+    }
+
+    // Anket ayarlarını kaydeder
+    function anketAyarlariKaydet(anketId) {
+      const aktif = document.getElementById('modalAnketAktif').checked;
+      
+      // Form oluşturur ve gönderir
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = `/admin/anket/${anketId}/ayarlar`;
+      
+      const aktifInput = document.createElement('input');
+      aktifInput.type = 'hidden';
+      aktifInput.name = 'aktif';
+      aktifInput.value = aktif ? '1' : '0';
+      form.appendChild(aktifInput);
+      
+      document.body.appendChild(form);
+      form.submit();
+    }
+
+    // Soru zorunluluğunu değiştirir
+    function soruZorunluToggle(soruId) {
+      const button = event.target.closest('button');
+      
+      // Eğer yeni anket modundaysak (
+      if (soruId.toString().startsWith('temp_')) {
+        // Yeni sorular için sadece JavaScript'te durumu değiştirir
+        yeniSoruZorunluToggle(soruId, button);
+        return;
+      }
+      
+      // Mevcut sorular için backend'e istek gönderir
+      const mevcutDurum = button.getAttribute('data-zorunlu') === 'true';
+      const yeniDurum = !mevcutDurum;
+      
+      // Form oluşturur ve gönderir
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = `/admin/soru/${soruId}/zorunlu`;
+      
+      const zorunluInput = document.createElement('input');
+      zorunluInput.type = 'hidden';
+      zorunluInput.name = 'zorunlu';
+      zorunluInput.value = yeniDurum ? '1' : '0';
+      form.appendChild(zorunluInput);
+      
+      document.body.appendChild(form);
+      form.submit();
+      
+      
+    }
+
+    // Yeni sorular için zorunlu toggle 
+    function yeniSoruZorunluToggle(soruId, button) {
+      const mevcutDurum = button.getAttribute('data-zorunlu') === 'true';
+      const yeniDurum = !mevcutDurum;
+      
+      // Button görünümünü güncelle
+      button.setAttribute('data-zorunlu', yeniDurum.toString());
+      button.className = yeniDurum ? 
+        'btn btn-warning btn-sm ms-2' : 
+        'btn btn-outline-secondary btn-sm ms-2';
+      button.innerHTML = yeniDurum ?
+        '<i class="fas fa-star me-1"></i>Zorunlu' :
+        '<i class="far fa-star me-1"></i>İsteğe Bağlı';
+      
+      // yeniSorular dizisinde de güncelle
+      const soru = yeniSorular.find(s => s.id === soruId);
+      if (soru) {
+        soru.zorunlu = yeniDurum;
+      }
+    }
+    
+    function mevcutSecenekFormKapat(soruId) {
+      const allCards = document.querySelectorAll('.soru-card');
+      for (let card of allCards) {
+        const button = card.querySelector(`button[onclick*="${soruId}"]`);
+        if (button) {
+          const form = card.querySelector('.mevcutsecenek-form');
+          if (form) {
+            form.remove();
+          }
+          return;
+        }
+      }
+    }
+  </script>
+
+  <% if (typeof yeniAnket !== 'undefined' && yeniAnket) { %>
+  <script>
+    // Yeni anket oluşturma modundaki JavaScript fonksiyonları
+    let yeniSorular = [];
+    let soruSayac = 0;
+
+    function yeniSoruEkle() {
+      // Modal açmak yerine inline form ekler
+      const container = document.getElementById('sorularContainer');
+      
+      // Eğer zaten bir form varsa, onu kaldırır
+      const mevcutForm = document.getElementById('yeniSoruFormu');
+      if (mevcutForm) {
+        mevcutForm.remove();
+      }
+      
+      // Yeni soru formu oluşturur
+      const formHtml = `
+        <div class="card mb-3" id="yeniSoruFormu" style="border: 2px dashed #28a745;">
+          <div class="card-header bg-light">
+            <h6 class="mb-0 text-success">
+              <i class="fas fa-plus me-2"></i>Yeni Soru Ekle
+            </h6>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <label class="form-label">Soru Metni</label>
+              <textarea class="form-control" id="yeniSoruMetni" rows="2" 
+                       placeholder="Soru metnini buraya yazın..." required></textarea>
+            </div>
+            <div class="d-flex gap-2">
+              <button type="button" class="btn btn-success" onclick="soruKaydet()">
+                <i class="fas fa-check me-1"></i>Soru Ekle
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="soruFormKapat()">
+                <i class="fas fa-times me-1"></i>İptal
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      container.insertAdjacentHTML('afterbegin', formHtml);
+      document.getElementById('yeniSoruMetni').focus();
+    }
+    
+    function soruKaydet() {
+      const soruMetni = document.getElementById('yeniSoruMetni').value.trim();
+      
+      if (!soruMetni) {
+        alert('Soru metni boş olamaz!');
+        return;
+      }
+      
+      soruSayac++;
+      const soru = {
+        id: `temp_${soruSayac}`,
+        soru_metni: soruMetni,
+        secenekler: [],
+        zorunlu: false 
+      };
+      
+      yeniSorular.push(soru);
+      soruFormKapat();
+      sorulariGuncelle();
+    }
+    
+    function soruFormKapat() {
+      const form = document.getElementById('yeniSoruFormu');
+      if (form) {
+        form.remove();
+      }
+    }
+
+    function soruSil(tempId) {
+      yeniSorular = yeniSorular.filter(s => s.id !== tempId);
+      sorulariGuncelle();
+    }
+
+    function secenekEkle(tempId) {
+      // Seçenek ekleme formunu soru kartının içine ekler
+      const soruCard = document.querySelector(`[data-soru-id="${tempId}"]`);
+      if (!soruCard) return;
+      
+      // Eğer zaten bir form varsa, onu kaldırır
+      const mevcutForm = soruCard.querySelector('.secenek-form');
+      if (mevcutForm) {
+        mevcutForm.remove();
+        return;
+      }
+      
+      // Seçenek formu oluşturur
+      const formHtml = `
+        <div class="secenek-form mt-3 p-3" style="background: #f8f9fa; border-radius: 8px; border-left: 4px solid #17a2b8;">
+          <div class="mb-2">
+            <label class="form-label small fw-bold text-info">Yeni Seçenek</label>
+            <input type="text" class="form-control form-control-sm" id="secenekMetni_${tempId}" 
+                   placeholder="Seçenek metnini yazın..." required>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-info btn-sm" onclick="secenekKaydet('${tempId}')">
+              <i class="fas fa-plus me-1"></i>Ekle
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="secenekFormKapat('${tempId}')">
+              <i class="fas fa-times me-1"></i>İptal
+            </button>
+          </div>
+        </div>
+      `;
+      
+      const cardBody = soruCard.querySelector('.card-body');
+      cardBody.insertAdjacentHTML('beforeend', formHtml);
+      document.getElementById(`secenekMetni_${tempId}`).focus();
+    }
+    
+    function secenekKaydet(tempId) {
+      const secenekMetni = document.getElementById(`secenekMetni_${tempId}`).value.trim();
+      
+      if (!secenekMetni) {
+        alert('Seçenek metni boş olamaz!');
+        return;
+      }
+      
+      const soru = yeniSorular.find(s => s.id === tempId);
+      if (soru) {
+        soru.secenekler.push(secenekMetni);
+        secenekFormKapat(tempId);
+        sorulariGuncelle();
+      }
+    }
+    
+    function secenekFormKapat(tempId) {
+      const soruCard = document.querySelector(`[data-soru-id="${tempId}"]`);
+      if (soruCard) {
+        const form = soruCard.querySelector('.secenek-form');
+        if (form) {
+          form.remove();
+        }
+      }
+    }
+
+    function secenekSil(tempId, secenekIndex) {
+      const soru = yeniSorular.find(s => s.id === tempId);
+      if (soru) {
+        soru.secenekler.splice(secenekIndex, 1);
+        sorulariGuncelle();
+      }
+    }
+
+    function sorulariGuncelle() {
+      const container = document.getElementById('sorularContainer');
+      if (!container) return;
+
+      // Yeni anket modunda container'ı tamamen temizler
+      container.innerHTML = '';
+
+      if (yeniSorular.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-5">
+            <i class="fas fa-question-circle fa-5x text-muted mb-3"></i>
+            <h4 class="text-muted">Henüz soru eklenmemiş.</h4>
+            <p class="text-muted">Yeni soru eklemek için yukarıdaki butona tıklayın.</p>
+          </div>
+        `;
+        return;
+      }
+
+      yeniSorular.forEach((soru, index) => {
+        const soruHtml = `
+          <div class="soru-card mb-3" data-soru-id="${soru.id}">
+            <div class="soru-header">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h5 class="mb-1">
+                    Soru ${index + 1}
+                    <button type="button" 
+                            class="btn ${soru.zorunlu ? 'btn-warning' : 'btn-outline-secondary'} btn-sm ms-2" 
+                            data-zorunlu="${soru.zorunlu}"
+                            onclick="soruZorunluToggle('${soru.id}')" 
+                            title="${soru.zorunlu ? 'Zorunlu Soru' : 'İsteğe Bağlı Soru'}">
+                      <i class="fas ${soru.zorunlu ? 'fa-star' : 'far fa-star'} me-1"></i>
+                      ${soru.zorunlu ? 'Zorunlu' : 'İsteğe Bağlı'}
+                    </button>
+                  </h5>
+                  <p class="mb-0">${soru.soru_metni}</p>
+                </div>
+                <div>
+                  <button type="button" class="btn btn-sm btn-outline-light me-2" 
+                          onclick="secenekEkle('${soru.id}')" title="Seçenek Ekle">
+                    <i class="fas fa-plus me-1"></i>Seçenek
+                  </button>
+                  <button type="button" class="btn btn-sm btn-outline-light" 
+                          onclick="soruSil('${soru.id}')" title="Soru Sil">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              ${soru.secenekler.length > 0 ? `
+                <h6 class="mb-3"><i class="fas fa-list me-2"></i>Seçenekler:</h6>
+                ${soru.secenekler.map((secenek, secIndex) => `
+                  <div class="secenek-item d-flex justify-content-between align-items-center mb-2">
+                    <span><i class="fas fa-check-circle text-info me-2"></i>${secenek}</span>
+                    <button type="button" class="btn btn-sm btn-outline-danger" 
+                            onclick="secenekSil('${soru.id}', ${secIndex})" title="Seçenek Sil">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                `).join('')}
+              ` : `
+                <div class="text-center py-3 text-muted">
+                  <i class="fas fa-info-circle me-2"></i>
+                  Bu soru için henüz seçenek eklenmemiş.
+                  <br><small>Seçenek eklemek için yukarıdaki "Seçenek" butonuna tıklayın.</small>
+                </div>
+              `}
+            </div>
+          </div>
+        `;
+        container.innerHTML += soruHtml;
+      });
+    }
+
+    function anketiKaydet() {
+      const anketBaslik = document.getElementById('anketBaslik').value.trim();
+      const anketAktif = document.getElementById('anketAktif').checked;
+      
+      if (!anketBaslik) {
+        alert('Anket başlığı boş olamaz!');
+        return;
+      }
+
+      if (yeniSorular.length === 0) {
+        alert('En az bir soru eklemelisiniz!');
+        return;
+      }
+
+      // Form oluşturur ve gönderir
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '/admin/yeniAnket';
+
+      // Anket başlığı
+      const baslikInput = document.createElement('input');
+      baslikInput.type = 'hidden';
+      baslikInput.name = 'anketBaslik';
+      baslikInput.value = anketBaslik;
+      form.appendChild(baslikInput);
+
+      // Anket ayarları
+      const aktifInput = document.createElement('input');
+      aktifInput.type = 'hidden';
+      aktifInput.name = 'anketAktif';
+      aktifInput.value = anketAktif ? '1' : '0';
+      form.appendChild(aktifInput);
+
+      // Sorular
+      yeniSorular.forEach((soru, index) => {
+        const soruInput = document.createElement('input');
+        soruInput.type = 'hidden';
+        soruInput.name = `sorular[${index}][soruMetni]`;
+        soruInput.value = soru.soru_metni;
+        form.appendChild(soruInput);
+
+        // Her sorunun zorunlu durumunu ekle
+        const zorunluInput = document.createElement('input');
+        zorunluInput.type = 'hidden';
+        zorunluInput.name = `sorular[${index}][zorunlu]`;
+        zorunluInput.value = soru.zorunlu ? '1' : '0';
+        form.appendChild(zorunluInput);
+
+        soru.secenekler.forEach((secenek, secIndex) => {
+          const secenekInput = document.createElement('input');
+          secenekInput.type = 'hidden';
+          secenekInput.name = `sorular[${index}][secenekler][]`;
+          secenekInput.value = secenek;
+          form.appendChild(secenekInput);
+        });
+      });
+
+      document.body.appendChild(form);
+      form.submit();
+    }
+
+    // Event listener'lar
+    document.addEventListener('DOMContentLoaded', function() {
+      // İlk renderı alır
+      if (typeof yeniSorular !== 'undefined') {
+        sorulariGuncelle();
+      }
+    });
+  </script>
+  <% } %>
+
+  <!-- copyright -->
+  <div style="text-align: center; padding: 20px; margin-top: 30px;">
+    <div style="display: inline-block; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 8px 20px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.05);">
+      <p style="margin: 0; color: #6c757d; font-size: 12px; font-weight: 500;">
+        © 2025 Mehmet Emin Fındıkçı
+      </p>
+    </div>
+  </div>
+
+</body>
+</html>

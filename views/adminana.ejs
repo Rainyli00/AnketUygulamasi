@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" href="/favicon.ico">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+    }
+
+    .sidebar {
+      height: 100vh;
+      background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
+      color: #fff;
+      padding: 1rem;
+      min-width: 220px;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.2);
+    }
+
+    .sidebar h3 {
+      margin-bottom: 2rem;
+      text-align: center;
+      color: #fbbf24;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+    }
+
+    .sidebar a {
+      color: #fff;
+      display: flex;
+      align-items: center;
+      margin: 1rem 0;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      transition: 0.3s;
+    }
+
+    .sidebar a i {
+      margin-right: 8px;
+      width: 16px;
+      text-align: center;
+    }
+
+    .sidebar a:hover, .sidebar a.active {
+      background: #fbbf24;
+      color: #111827;
+      font-weight: 600;
+      transform: translateX(5px);
+    }
+
+    .main {
+      padding: 2rem;
+      flex-grow: 1;
+    }
+
+    .welcome-header {
+      background: white;
+      border-radius: 15px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border-left: 4px solid #fbbf24;
+    }
+
+    .welcome-header h2 {
+      margin: 0;
+      color: #1f2937;
+      display: flex;
+      align-items: center;
+    }
+
+    .welcome-header h4 {
+      margin: 0;
+      color: #1f2937;
+    }
+
+    .header-with-badge {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .time-badge {
+      background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
+    }
+
+    .time-badge i {
+      margin-right: 4px;
+      font-size: 0.7rem;
+    }
+
+    .welcome-header p {
+      margin: 0.5rem 0 0 0;
+      color: #6b7280;
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: center;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+    }
+
+    .activity-item i {
+      margin-right: 8px;
+      width: 18px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .activity-item .activity-content {
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+    .activity-item .activity-text {
+      margin: 0;
+      line-height: 1.4;
+    }
+
+    .activity-item .activity-time {
+      margin: 4px 0 0 0;
+      font-size: 0.8rem;
+      background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+      color: #64748b;
+      padding: 2px 8px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      font-weight: 500;
+      border: 1px solid #e2e8f0;
+    }
+
+    .activity-item .activity-time i {
+      margin-right: 4px;
+      font-size: 0.7rem;
+      width: auto;
+    }
+
+    .admin-info {
+      padding: 1rem;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .admin-welcome {
+      font-size: 1.1rem;
+      margin-bottom: 5px;
+    }
+
+    .admin-info small {
+      font-size: 0.85rem;
+    }
+
+    .card {
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      text-align: center;
+      color: #fff;
+      transition: transform 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+    }
+
+    .card h3 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .card p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+
+    .card i {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      opacity: 0.8;
+    }
+
+    .card-anket { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }    
+    .card-kullanici { background: linear-gradient(135deg, #10b981, #047857); } 
+    .card-cevap { background: linear-gradient(135deg, #f97316, #ea580c); }    
+
+    @media (max-width: 768px) {
+      .row > div { margin-bottom: 1rem; }
+    }
+  </style>
+
+  
+
+</head>
+<body>
+  <div class="d-flex">
+    <div class="sidebar">
+      <h3>Admin Panel</h3>
+      <a href="/admin" class="active">
+        <i class="fas fa-tachometer-alt"></i> Dashboard
+      </a>
+      <a href="/admin/anketler">
+        <i class="fas fa-poll"></i> Anketler
+      </a>
+      <a href="/admin/kullaniciCevap">
+        <i class="fas fa-users"></i> Kullanıcılar
+      </a>
+      <a href="/admin/anketIstatistik">
+        <i class="fas fa-chart-bar"></i> İstatistik
+      </a>
+      <hr style="margin: 2rem 0; border-color: #374151;">
+      <a href="/admin/cikis" style="color: #ef4444;">
+        <i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i>Çıkış Yap
+      </a>
+    </div>
+
+    <div class="main">
+      <div class="welcome-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h2><i class="fas fa-home" style="color: #fbbf24; margin-right: 10px;"></i>Dashboard</h2>
+            
+          </div>
+          <div class="admin-info text-end">
+            <div class="admin-welcome">
+              <i class="fas fa-user-shield" style="color: #3b82f6; margin-right: 8px;"></i>
+              <span style="font-weight: 600; color: #1f2937;">Hoş geldiniz,</span>
+              <span style="color: #3b82f6; font-weight: 700;"><%= typeof adminBilgi !== 'undefined' && adminBilgi.adSoyad ? adminBilgi.adSoyad : 'Admin' %></span>
+            </div>
+            <small class="text-muted">
+              <i class="fas fa-clock" style="margin-right: 5px;"></i>
+              <span id="current-time"></span> - <span id="current-date"></span>
+            </small>
+          </div>
+        </div>
+      </div>
+      
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="card card-anket">
+            <i class="fas fa-poll"></i>
+            <h3 class="sayim" toplam-sayi="<%= toplamAnketSayi %>">0</h3>
+            <p>Toplam Anket</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card card-kullanici">
+            <i class="fas fa-users"></i>
+            <h3 class="sayim" toplam-sayi="<%= toplamKullaniciSayi %>">0</h3>
+            <p>Toplam Kullanıcı</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card card-cevap">
+            <i class="fas fa-comments"></i>
+            <h3 class="sayim" toplam-sayi="<%= toplamCevapSayi %>">0</h3>
+            <p>Toplam Cevap</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Son İşlemlerdir -->
+      <div class="row mt-4">
+        <div class="col-md-12">
+          <div class="welcome-header">
+            <div class="header-with-badge">
+              <h4>
+                <i class="fas fa-history" style="color: #fbbf24; margin-right: 8px;"></i>
+                Son İşlemler
+              </h4>
+              <div class="time-badge">
+                <i class="fas fa-clock"></i>
+                Son 24 saat
+              </div>
+            </div>
+            <div class="mt-3 row">
+              <div class="col-md-4">
+                <div class="activity-item">
+                  <i class="fas fa-plus-circle text-primary"></i>
+                  <div class="activity-content">
+                    <span class="activity-text">
+                      <%= sonIslemler.yeniAnketSayi > 0 ? 
+                          sonIslemler.yeniAnketSayi + ' yeni anket oluşturuldu' : 
+                          'Bugün yeni anket oluşturulmadı' %>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="activity-item">
+                  <i class="fas fa-user-plus text-success"></i>
+                  <div class="activity-content">
+                    <span class="activity-text">
+                      <%= sonIslemler.yeniKullaniciSayi > 0 ? 
+                          sonIslemler.yeniKullaniciSayi + ' yeni kullanıcı kaydı' : 
+                          'Bugün yeni kullanıcı kaydı yok' %>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="activity-item">
+                  <i class="fas fa-comments text-warning"></i>
+                  <div class="activity-content">
+                    <span class="activity-text">
+                      <%= sonIslemler.yeniCevapSayi > 0 ? 
+                          sonIslemler.yeniCevapSayi + ' yeni cevap alındı' : 
+                          'Bugün yeni cevap yok' %>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tarih ve saat bilgisini güncelleyen fonksiyon
+    function tarihSaatGuncelle() {
+      const zaman = new Date();
+      
+      // Saat formatıdır
+      const saatSecenekleri = {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      };
+      const saatMetni = zaman.toLocaleTimeString('tr-TR', saatSecenekleri);
+      
+      // Tarih formatıdır
+      const tarihSecenekleri = {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      };
+      const tarihMetni = zaman.toLocaleDateString('tr-TR', tarihSecenekleri);
+      
+      document.getElementById('current-time').textContent = saatMetni;
+      document.getElementById('current-date').textContent = tarihMetni;
+    }
+
+    // Sayı animasyonu
+    const sayimlar = document.querySelectorAll('.sayim');
+
+    sayimlar.forEach((sayim, sira) => {
+      setTimeout(() => {
+        const sayimAnimasyonu = () => {
+          const hedefSayi = +sayim.getAttribute('toplam-sayi');
+          const mevcutSayi = +sayim.innerText;
+          const artis = hedefSayi / 50; 
+
+          if(mevcutSayi < hedefSayi) {
+            sayim.innerText = Math.ceil(mevcutSayi + artis);
+            setTimeout(sayimAnimasyonu, 15); 
+          } else {
+            sayim.innerText = hedefSayi;
+            
+            sayim.style.textShadow = '0 0 15px rgba(255,255,255,0.5)';
+            setTimeout(() => {
+              sayim.style.textShadow = 'none';
+            }, 300);
+          }
+        };
+        sayimAnimasyonu();
+      }, sira * 150); 
+    });
+
+    // Kartlara üzerine gelince efekt yapan kısım
+    document.querySelectorAll('.card').forEach(kart => {
+      kart.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-8px) scale(1.02)';
+      });
+      
+      kart.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(-5px) scale(1)';
+      });
+    });
+
+    
+    tarihSaatGuncelle();
+    // Her saniye güncellenir
+    setInterval(tarihSaatGuncelle, 1000);
+  </script>
+
+  <!-- copyright-->
+  <div style="text-align: center; padding: 15px; margin-top: 20px;">
+    <div style="display: inline-block; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 8px 16px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.05);">
+      <p style="margin: 0; color: #6c757d; font-size: 11px; font-weight: 500;">
+        © 2025 Mehmet Emin Fındıkçı
+      </p>
+    </div>
+  </div>
+
+</body>
+</html>

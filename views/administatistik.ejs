@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anket İstatistikleri - Admin Panel</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" href="/favicon.ico">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+    }
+
+    .sidebar {
+      height: 100vh;
+      background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
+      color: #fff;
+      padding: 1rem;
+      min-width: 220px;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.2);
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .sidebar h3 {
+      margin-bottom: 2rem;
+      text-align: center;
+      color: #fbbf24;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+    }
+
+    .sidebar a {
+      color: #fff;
+      display: block;
+      margin: 1rem 0;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      transition: 0.3s;
+    }
+
+    .sidebar a:hover, .sidebar a.active {
+      background: #fbbf24;
+      color: #111827;
+      font-weight: 600;
+      transform: translateX(5px);
+    }
+
+    .main-content {
+      margin-left: 220px;
+      padding: 2rem;
+      min-height: 100vh;
+    }
+
+    .stats-card {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      border: none;
+      margin-bottom: 2rem;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .stats-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+    }
+
+    .stats-header {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+      padding: 1.5rem;
+    }
+
+    .stats-number {
+      font-size: 2.5rem;
+      font-weight: 700;
+      text-align: center;
+      margin: 1rem 0;
+    }
+
+    .anket-card {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      border: none;
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+
+    .anket-header {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      padding: 1.5rem;
+    }
+
+    .anket-header-button {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+      border: none !important;
+      color: white !important;
+      border-radius: 15px 15px 0 0 !important;
+      box-shadow: none !important;
+      padding: 1.5rem !important;
+    }
+
+    .anket-header-button:not(.collapsed) {
+      background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+      color: white !important;
+      box-shadow: none !important;
+    }
+
+    .anket-header-button:focus {
+      box-shadow: none !important;
+    }
+
+    .anket-header-button::after {
+      color: white !important;
+      filter: brightness(0) invert(1);
+    }
+
+    .accordion-item {
+      border: none !important;
+      margin-bottom: 1rem;
+    }
+
+    .accordion-body {
+      border-top: 2px solid #e5e7eb;
+    }
+
+    .pagination .page-link {
+      color: #3b82f6;
+      border-color: #e5e7eb;
+      padding: 0.75rem 1rem;
+    }
+
+    .pagination .page-item.active .page-link {
+      background-color: #3b82f6;
+      border-color: #3b82f6;
+      color: white;
+    }
+
+    .pagination .page-link:hover {
+      background-color: #f3f4f6;
+      border-color: #d1d5db;
+      color: #1d4ed8;
+    }
+
+    .pagination .page-item.disabled .page-link {
+      color: #9ca3af;
+      background-color: #f9fafb;
+      border-color: #e5e7eb;
+    }
+
+    .soru-card {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-left: 4px solid #3b82f6;
+    }
+
+    .secenek-bar {
+      background: #e5e7eb;
+      border-radius: 10px;
+      height: 30px;
+      margin: 0.5rem 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .secenek-fill {
+      background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+      height: 100%;
+      border-radius: 10px;
+      transition: width 0.5s ease;
+      position: relative;
+    }
+
+    .secenek-text {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-weight: 600;
+      color: white;
+      z-index: 2;
+    }
+
+    .secenek-percent {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-weight: 600;
+      color: #374151;
+      z-index: 3;
+    }
+
+    .chart-container {
+      background: white;
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      margin: 2rem 0;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+      }
+      
+      .main-content {
+        margin-left: 0;
+        padding: 1rem;
+      }
+      
+      .sidebar.show {
+        transform: translateX(0);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <h3>Admin Panel</h3>
+    <a href="/admin">
+      <i class="fas fa-tachometer-alt"></i> Dashboard
+    </a>
+    <a href="/admin/anketler">
+      <i class="fas fa-poll"></i> Anketler
+    </a>
+    <a href="/admin/kullaniciCevap">
+      <i class="fas fa-users"></i> Kullanıcılar
+    </a>
+    <a href="/admin/anketIstatistik" class="active">
+      <i class="fas fa-chart-bar"></i> İstatistik
+    </a>
+    <hr style="margin: 2rem 0; border-color: #374151;">
+    <a href="/admin/cikis" style="color: #ef4444;">
+      <i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i>Çıkış Yap
+    </a>
+  </div>
+
+
+  <div class="main-content">
+   
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2><i class="fas fa-chart-bar me-3"></i>Anket İstatistikleri</h2>
+      </div>
+  <button class="btn btn-primary d-md-none" onclick="yanMenuGecis()">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+
+    <!-- Filtre ve arama Kısmı -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <form method="GET" action="/admin/anketIstatistik" class="row g-3">
+          <div class="col-md-4">
+            <label for="arama" class="form-label">Anket Ara</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-search"></i></span>
+              <input type="text" class="form-control" id="arama" name="arama" 
+                     placeholder="Anket başlığı ara..." value="<%= (typeof filtreler !== 'undefined' && filtreler.arama) ? filtreler.arama : '' %>">
+            </div>
+          </div>
+          <div class="col-md-3">
+            <label for="durum" class="form-label">Durum</label>
+            <select class="form-select" id="durum" name="durum">
+              <option value="" <%= (typeof filtreler === 'undefined' || filtreler.durum === '') ? 'selected' : '' %>>Tümü</option>
+              <option value="aktif" <%= (typeof filtreler !== 'undefined' && filtreler.durum === 'aktif') ? 'selected' : '' %>>Aktif</option>
+              <option value="pasif" <%= (typeof filtreler !== 'undefined' && filtreler.durum === 'pasif') ? 'selected' : '' %>>Pasif</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">&nbsp;</label>
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-filter me-1"></i>Filtrele
+              </button>
+              <a href="/admin/anketIstatistik" class="btn btn-outline-secondary">
+                <i class="fas fa-times me-1"></i>Temizle
+              </a>
+            </div>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">&nbsp;</label>
+            <div class="text-muted small">
+              <i class="fas fa-info-circle me-1"></i>
+              <%= (typeof pagination !== 'undefined' && pagination.toplamAnket) ? pagination.toplamAnket : 0 %> anket bulundu
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Genel istatistik kısmı -->
+    <div class="row mb-4">
+      <div class="col-lg-3 col-md-6">
+        <div class="stats-card">
+          <div class="stats-header text-center">
+            <i class="fas fa-poll fa-2x mb-2"></i>
+            <h5>Toplam Anket</h5>
+          </div>
+          <div class="stats-number text-primary">
+            <%= genelIstatistikler.toplamAnket %>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="stats-card">
+          <div class="stats-header text-center">
+            <i class="fas fa-check-circle fa-2x mb-2"></i>
+            <h5>Aktif Anket</h5>
+          </div>
+          <div class="stats-number text-success">
+            <%= genelIstatistikler.aktifAnket %>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="stats-card">
+          <div class="stats-header text-center">
+            <i class="fas fa-users fa-2x mb-2"></i>
+            <h5>Toplam Kullanıcı</h5>
+          </div>
+          <div class="stats-number text-info">
+            <%= genelIstatistikler.toplamKullanici %>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="stats-card">
+          <div class="stats-header text-center">
+            <i class="fas fa-comments fa-2x mb-2"></i>
+            <h5>Toplam Cevap</h5>
+          </div>
+          <div class="stats-number text-warning">
+            <%= genelIstatistikler.toplamCevap %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Anket detay istatikleri kısmı -->
+    <% if (anketIstatistikleri.length > 0) { %>
+      <div class="accordion" id="anketAccordion">
+        <% anketIstatistikleri.forEach(function(anket, index) { %>
+          <div class="accordion-item anket-card mb-3">
+            <h2 class="accordion-header" id="heading<%= index %>">
+              <button class="accordion-button <%= index > 0 ? 'collapsed' : '' %> anket-header-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse<%= index %>" aria-expanded="<%= index === 0 ? 'true' : 'false' %>" aria-controls="collapse<%= index %>">
+                <div class="d-flex justify-content-between align-items-center w-100 me-3">
+                  <div>
+                    <h5 class="mb-1 text-white">
+                      <%= anket.baslik %>
+                      <span class="badge bg-light text-dark ms-2"><%= anket.sorular ? anket.sorular.length : 0 %> soru</span>
+                    </h5>
+                    <small class="opacity-75 text-white">
+                      <i class="fas fa-calendar me-1"></i>
+                      <%= new Date(anket.olusturma_tarihi).toLocaleDateString('tr-TR') %>
+                    </small>
+                  </div>
+                  <div class="text-end text-white">
+                    <div><strong><%= anket.katilimci_sayisi || 0 %></strong> Katılımcı</div>
+                    <div><strong><%= anket.toplam_cevap || 0 %></strong> Toplam Cevap</div>
+                  </div>
+                </div>
+              </button>
+            </h2>
+            <div id="collapse<%= index %>" class="accordion-collapse collapse <%= index === 0 ? 'show' : '' %>" aria-labelledby="heading<%= index %>" data-bs-parent="#anketAccordion">
+              <div class="accordion-body p-3">
+                <% if (anket.sorular && anket.sorular.length > 0) { %>
+                  <% anket.sorular.forEach(function(soru) { %>
+                    <div class="soru-card">
+                      <h6 class="fw-bold text-primary mb-3">
+                        <i class="fas fa-question-circle me-2"></i>
+                        <%= soru.soru_metni %>
+                      </h6>
+                      
+                      <% if (soru.secenekler && soru.secenekler.length > 0) { %>
+                        <% soru.secenekler.forEach(function(secenek) { %>
+                          <div class="mb-2">
+                            <div class="d-flex justify-content-between mb-1">
+                              <span class="fw-bold"><%= secenek.secenek_metni %></span>
+                              <span class="text-muted">
+                                <%= secenek.secim_sayisi || 0 %> oy (<%= secenek.yuzde || 0 %>%)
+                              </span>
+                            </div>
+                            <div class="secenek-bar">
+                              <div class="secenek-fill" data-width="<%= secenek.yuzde || 0 %>"></div>
+                            </div>
+                          </div>
+                        <% }) %>
+                      <% } else { %>
+                        <p class="text-muted">Bu soru için henüz cevap bulunmuyor.</p>
+                      <% } %>
+                    </div>
+                  <% }) %>
+                <% } else { %>
+                  <div class="text-center py-4">
+                    <i class="fas fa-question-circle fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">Bu anket için henüz soru bulunmuyor.</p>
+                  </div>
+                <% } %>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div class="text-center py-5">
+        <i class="fas fa-chart-bar fa-5x text-muted mb-3"></i>
+        <h4>Henüz anket istatistiği bulunmuyor</h4>
+        <p class="text-muted">Anket oluşturup cevaplar geldikten sonra istatistikleri burada görebilirsiniz.</p>
+      </div>
+    <% } %>
+
+    <!-- Sayfalama kısmı -->
+    <% if (typeof pagination !== 'undefined' && pagination.toplamSayfa > 1) { %>
+      <nav aria-label="İstatistik sayfaları">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <small class="text-muted">
+              Sayfa <%= pagination.mevcutSayfa %> / <%= pagination.toplamSayfa %> 
+              (Toplam <%= pagination.toplamAnket %> anket)
+            </small>
+          </div>
+          <ul class="pagination mb-0">
+            <!-- Önceki sayfa kısmı-->
+            <% if (pagination.mevcutSayfa > 1) { %>
+              <li class="page-item">
+                <a class="page-link" href="?sayfa=<%= pagination.mevcutSayfa - 1 %>&arama=<%= (typeof filtreler !== 'undefined' && filtreler.arama) ? filtreler.arama : '' %>&durum=<%= (typeof filtreler !== 'undefined' && filtreler.durum) ? filtreler.durum : '' %>">
+                  <i class="fas fa-chevron-left"></i>
+                </a>
+              </li>
+            <% } else { %>
+              <li class="page-item disabled">
+                <span class="page-link"><i class="fas fa-chevron-left"></i></span>
+              </li>
+            <% } %>
+
+            <!-- Sayfa numaraları kısmı -->
+            <% 
+              const baslangic = Math.max(1, pagination.mevcutSayfa - 2);
+              const bitis = Math.min(pagination.toplamSayfa, pagination.mevcutSayfa + 2);
+            %>
+            
+            <% if (baslangic > 1) { %>
+              <li class="page-item">
+                <a class="page-link" href="?sayfa=1&arama=<%= (typeof filtreler !== 'undefined' && filtreler.arama) ? filtreler.arama : '' %>&durum=<%= (typeof filtreler !== 'undefined' && filtreler.durum) ? filtreler.durum : '' %>">1</a>
+              </li>
+              <% if (baslangic > 2) { %>
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+              <% } %>
+            <% } %>
+
+            <% for (let i = baslangic; i <= bitis; i++) { %>
+              <li class="page-item <%= i === pagination.mevcutSayfa ? 'active' : '' %>">
+                <a class="page-link" href="?sayfa=<%= i %>&arama=<%= (typeof filtreler !== 'undefined' && filtreler.arama) ? filtreler.arama : '' %>&durum=<%= (typeof filtreler !== 'undefined' && filtreler.durum) ? filtreler.durum : '' %>">
+                  <%= i %>
+                </a>
+              </li>
+            <% } %>
+
+            <% if (bitis < pagination.toplamSayfa) { %>
+              <% if (bitis < pagination.toplamSayfa - 1) { %>
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+              <% } %>
+              <li class="page-item">
+                <a class="page-link" href="?sayfa=<%= pagination.toplamSayfa %>&arama=<%= (typeof filtreler !== 'undefined' && filtreler.arama) ? filtreler.arama : '' %>&durum=<%= (typeof filtreler !== 'undefined' && filtreler.durum) ? filtreler.durum : '' %>">
+                  <%= pagination.toplamSayfa %>
+                </a>
+              </li>
+            <% } %>
+
+            <!-- Sonraki sayfa kısmı -->
+            <% if (pagination.mevcutSayfa < pagination.toplamSayfa) { %>
+              <li class="page-item">
+                <a class="page-link" href="?sayfa=<%= pagination.mevcutSayfa + 1 %>&arama=<%= (typeof filtreler !== 'undefined' && filtreler.arama) ? filtreler.arama : '' %>&durum=<%= (typeof filtreler !== 'undefined' && filtreler.durum) ? filtreler.durum : '' %>">
+                  <i class="fas fa-chevron-right"></i>
+                </a>
+              </li>
+            <% } else { %>
+              <li class="page-item disabled">
+                <span class="page-link"><i class="fas fa-chevron-right"></i></span>
+              </li>
+            <% } %>
+          </ul>
+        </div>
+      </nav>
+    <% } %>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // responsive tasarım için fonksiyon
+    function yanMenuGecis() {
+      const yanMenu = document.querySelector('.sidebar');
+      yanMenu.classList.toggle('show');
+    }
+
+    // Mobilde dışarıya tıklanınca yan menüyü otomatik gizler
+    document.addEventListener('click', function(olay) {
+      const yanMenu = document.querySelector('.sidebar');
+      const gecisButonu = olay.target.closest('[onclick="yanMenuGecis()"]');
+      
+      if (window.innerWidth <= 768 && !yanMenu.contains(olay.target) && !gecisButonu) {
+        yanMenu.classList.remove('show');
+      }
+    });
+
+    // İlerleme çubuklarını animasyonla doldurur.
+    document.addEventListener('DOMContentLoaded', function() {
+      // İlk accordion açıksa ilerleme çubuklarını başlatır.
+      ilerlemeCubuklariAnimasyon('#collapse0');
+      
+      // Accordion açıldığında ilerleme çubuklarını çalıştırır.
+      document.querySelectorAll('.accordion-collapse').forEach(function(accordion) {
+        accordion.addEventListener('shown.bs.collapse', function() {
+          ilerlemeCubuklariAnimasyon('#' + this.id);
+        });
+      });
+    });
+
+    function ilerlemeCubuklariAnimasyon(konteynerId) {
+      const konteyner = document.querySelector(konteynerId);
+      if (!konteyner) return;
+      
+      const cubuklar = konteyner.querySelectorAll('.secenek-fill');
+      cubuklar.forEach(cubuk => {
+        const genislik = cubuk.getAttribute('data-width') + '%';
+        cubuk.style.width = '0%';
+        setTimeout(() => {
+          cubuk.style.width = genislik;
+        }, 200);
+      });
+    }
+  </script>
+
+  <!-- copyright -->
+  <div style="text-align: center; padding: 15px; margin-top: 20px;">
+    <div style="display: inline-block; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 8px 16px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.05);">
+      <p style="margin: 0; color: #6c757d; font-size: 11px; font-weight: 500;">
+        © 2025 Mehmet Emin Fındıkçı
+      </p>
+    </div>
+  </div>
+</body>
+</html>

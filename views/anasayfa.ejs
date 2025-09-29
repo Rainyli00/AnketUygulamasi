@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anketler - Ana Sayfa</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" href="/favicon.ico">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f1f5f9;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .main-container {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      margin: 2rem auto;
+      max-width: 1200px;
+      overflow: hidden;
+    }
+
+    .header-section {
+      background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+      color: white;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .header-section h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .header-section p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      margin: 0;
+    }
+
+    .search-section {
+      background: white;
+      padding: 2rem;
+      border-bottom: 2px solid #f1f5f9;
+    }
+
+    .search-card {
+      border: none;
+      border-radius: 15px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .anket-card {
+      border: none;
+      border-radius: 15px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+
+    .anket-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    }
+
+    .anket-header {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+      padding: 1.5rem;
+    }
+
+    .anket-body {
+      padding: 1.5rem;
+      background: white;
+    }
+
+    .anket-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .anket-date {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    .btn-start {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      color: white;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .btn-start:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+      color: white;
+    }
+
+    .pagination .page-link {
+      border: none;
+      border-radius: 10px;
+      margin: 0 2px;
+      padding: 0.75rem 1rem;
+      color: #1f2937;
+      font-weight: 500;
+    }
+
+    .pagination .page-item.active .page-link {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      border-color: transparent;
+    }
+
+    .pagination .page-link:hover {
+      background: #f1f5f9;
+      color: #1f2937;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: #6b7280;
+    }
+
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .filter-input {
+      border: 2px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .filter-input:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <!-- Baş kısm -->
+    <div class="header-section">
+      <h1><i class="fas fa-poll-h me-3"></i>Anket Merkezi</h1>
+      <p>Görüşlerinizi paylaşın ve anketleri doldurun</p>
+    </div>
+
+    <!-- Arama kısmı -->
+    <div class="search-section">
+      <div class="search-card card">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-md-8">
+              <label class="form-label fw-bold">
+                <i class="fas fa-search me-2 text-primary"></i>Anket Ara
+              </label>
+              <input type="text" 
+                     id="filterInput" 
+                     value="<%= filtre %>" 
+                     class="form-control filter-input" 
+                     placeholder="Anket başlığına göre arama yapın..." 
+                     autocomplete="off">
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+              <small class="text-muted">
+                <i class="fas fa-info-circle me-1"></i>
+                Toplam <%= typeof toplamAnket !== 'undefined' ? toplamAnket : 0 %> anket bulundu
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Anket Listesi kısmı -->
+    <div class="px-4 py-3" id="anketListesi">
+      <% if (anketler.length > 0) { %>
+        <div class="row">
+          <% anketler.forEach(anket => { %>
+            <div class="col-lg-6 col-xl-4">
+              <div class="anket-card">
+                <div class="anket-header">
+                  <div class="anket-title"><%= anket.baslik %></div>
+                  <div class="anket-date">
+                    <i class="fas fa-calendar me-1"></i>
+                    <%= new Date(anket.olusturma_tarihi).toLocaleDateString('tr-TR') %>
+                  </div>
+                </div>
+                <div class="anket-body">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                      <i class="fas fa-hashtag me-1"></i>ID: <%= anket.id %>
+                    </small>
+                    <a href="/users/anket/<%= anket.id %>/baslat" class="btn btn-start">
+                      <i class="fas fa-play me-2"></i>Anketi Başlat
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <div class="empty-state">
+          <i class="fas fa-poll-h"></i>
+          <h4>Henüz anket bulunmamaktadır</h4>
+          <p>Aradığınız kriterlere uygun anket bulunamadı.</p>
+        </div>
+      <% } %>
+
+      <!-- Sayfalama Kısmı -->
+  <% if (toplamSayfa > 1) { %>
+        <nav aria-label="Sayfalama" class="mt-4">
+          <ul class="pagination justify-content-center">
+            <% for(let i=1; i<=toplamSayfa; i++) { %>
+              <li class="page-item <%= i === sayfa ? 'active' : '' %>">
+                <a class="page-link" href="?sayfa=<%= i %>&filtre=<%= filtre %>"><%= i %></a>
+              </li>
+            <% } %>
+          </ul>
+        </nav>
+      <% } %>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+      const filtreBolmesi = document.getElementById('filterInput');
+      let zamanlayiciId;
+
+      filtreBolmesi.addEventListener('keyup', function() {
+        clearTimeout(zamanlayiciId);
+        
+        zamanlayiciId = setTimeout(async () => {
+          const filtreDegeri = this.value.trim();
+          
+          try {
+            const yanit = await fetch(`?filtre=${encodeURIComponent(filtreDegeri)}&sayfa=1&ajax=1`);
+            const htmlMetni = await yanit.text();
+            
+            // anket kısmını günceller
+            const ayristirici = new DOMParser();
+            const dokuman = ayristirici.parseFromString(htmlMetni, 'text/html');
+            const yeniListe = dokuman.getElementById('anketListesi');
+            
+            if (yeniListe) { // ul etiketi
+              document.getElementById('anketListesi').innerHTML = yeniListe.innerHTML;
+            }
+          } catch (hata) {
+            console.error('Filtreleme hatası:', hata);
+          }
+        }, 300);
+      });
+      
+      // page de ajax kullamıyoruz
+      document.addEventListener('click', function(olay) {
+        if (olay.target.classList.contains('page-link')) {
+          olay.preventDefault();
+          const urlAdres = new URL(olay.target.href);
+          const sayfaNo = urlAdres.searchParams.get('sayfa');
+          const filtreDegeri = document.getElementById('filterInput').value.trim();
+          
+          fetch(`?sayfa=${sayfaNo}&filtre=${encodeURIComponent(filtreDegeri)}&ajax=1`)
+            .then(yanit => yanit.text())
+            .then(htmlMetni => {
+              const ayristirici = new DOMParser();
+              const dokuman = ayristirici.parseFromString(htmlMetni, 'text/html');
+              const yeniListe = dokuman.getElementById('anketListesi');
+              
+              if (yeniListe) {
+                document.getElementById('anketListesi').innerHTML = yeniListe.innerHTML;
+              }
+            });
+        }
+      });
+    </script>
+  </div>
+
+  <!-- copyright -->
+  <div style="text-align: center; padding: 20px; margin-top: 30px;">
+    <div style="display: inline-block; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 8px 20px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.05);">
+      <p style="margin: 0; color: #6c757d; font-size: 12px; font-weight: 500;">
+        © 2025 Mehmet Emin Fındıkçı
+      </p>
+    </div>
+  </div>
+</body>
+</html>

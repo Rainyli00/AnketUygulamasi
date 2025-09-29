@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 Sayfa Bulunamadı</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" href="/favicon.ico">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #121212;
+      overflow: hidden;
+      color: #fff;
+      perspective: 1000px; 
+    }
+
+    .container {
+      text-align: center;
+      transition: transform 0.1s ease-out;
+    }
+
+    h1 {
+      font-size: 12rem;
+      font-weight: bold;
+      color: #ff6b81;
+      text-shadow: 0 0 30px rgba(255, 107, 129, 0.7);
+      transition: transform 0.1s ease-out;
+    }
+
+    h2 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+      color: #fff;
+    }
+
+    p {
+      font-size: 1.2rem;
+      margin-bottom: 30px;
+    }
+
+    a {
+      display: inline-block;
+      padding: 12px 25px;
+      font-size: 1rem;
+      color: #121212;
+      background: #ff6b81;
+      border-radius: 50px;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+
+    a:hover {
+      background: #ff4757;
+      transform: translateY(-3px);
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 6rem;
+      }
+      h2 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>404</h1>
+    <h2>Sayfa Bulunamadı</h2>
+    <p>Üzgünüz, aradığınız sayfa mevcut değil. Ana sayfaya dönmek ister misiniz?</p>
+    <a href="/">Ana Sayfa</a>
+  </div>
+
+  <script>
+    
+    const container = document.querySelector('.container');
+    const h1 = document.querySelector('h1');
+
+    document.addEventListener('mousemove', e => {
+      const x = (window.innerWidth / 2 - e.clientX) / 25;
+      const y = (window.innerHeight / 2 - e.clientY) / 25;
+
+      container.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
+      h1.style.transform = `translateX(${-x}px) translateY(${y}px)`;
+    });
+  </script>
+  
+  <!-- copyright -->
+  <div style="text-align: center; padding: 20px; margin-top: 30px;">
+    <div style="display: inline-block; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); padding: 8px 20px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);">
+      <p style="margin: 0; color: #fff; font-size: 12px; font-weight: 500;">
+        © 2025 Mehmet Emin Fındıkçı
+      </p>
+    </div>
+  </div>
+</body>
+</html>
